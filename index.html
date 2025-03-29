@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login com Sugestões Completo</title>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+        
+        .login-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 350px;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        h1 {
+            color: #2575fc;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .suggestions {
+            position: absolute;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 0 0 5px 5px;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .suggestion-item {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .suggestion-item:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .password-hint {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>Login Completo</h1>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Usuário</label>
+                <input type="text" id="username" name="username" autocomplete="off" placeholder="Digite seu usuário">
+                <div class="suggestions" id="suggestions"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Senha</label>
+                <input type="password" id="password" name="password" placeholder="Digite sua senha">
+                <div class="password-hint" id="passwordHint"></div>
+            </div>
+            
+            <button type="submit">Entrar</button>
+        </form>
+    </div>
+
+    <script>
+        // ☠️ Banco de dados de usuários e senhas hardcoded (INSEGURO)
+        const userDatabase = {
+            "a": [
+                { username: "alex", password: "Alex123@" },
+                { username: "ana", password: "Ana#2023" },
+                { username: "andre", password: "Andre*456" },
+                { username: "amanda", password: "Amanda!789" },
+                { username: "admin", password: "Admin@123" }
+            ],
+            "b": [
+                { username: "bruno", password: "Bruno$321" },
+                { username: "beatriz", password: "Beatriz1%" },
+                { username: "bianca", password: "Bianca*654" }
+            ],
+            "c": [
+                { username: "carlos", password: "Carlos987!" },
+                { username: "claudia", password: "Claudia@321" },
+                { username: "cristina", password: "Cristina#456" }
+            ],
+            "d": [
+                { username: "daniel", password: "Daniel123*" },
+                { username: "diana", password: "Diana456#" }
+            ],
+            // ... outros usuários ...
+            "m": [
+                { username: "marcos", password: "Marcos$2023" },
+                { username: "maria", password: "Maria#4567" }
+            ],
+            "t": [
+                { username: "tiago", password: "Tiago*7890" },
+                { username: "tatiana", password: "Tatiana!1234" }
+            ]
+        };
+
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const suggestionsBox = document.getElementById('suggestions');
+        const passwordHint = document.getElementById('passwordHint');
+
+        // ☠️ Mostra sugestões para qualquer letra digitada
+        usernameInput.addEventListener('input', function() {
+            const input = this.value.toLowerCase();
+            suggestionsBox.innerHTML = '';
+            
+            if (input.length === 1 && userDatabase[input]) {
+                const matchingUsers = userDatabase[input];
+                
+                matchingUsers.forEach(user => {
+                    const suggestionItem = document.createElement('div');
+                    suggestionItem.className = 'suggestion-item';
+                    suggestionItem.textContent = user.username;
+                    
+                    suggestionItem.addEventListener('click', function() {
+                        usernameInput.value = user.username;
+                        passwordInput.value = user.password; // ☠️ AUTO-PREENCHE SENHA (INSEGURO)
+                        passwordHint.textContent = `Dica: A senha de ${user.username} é ${user.password}`; // ☠️ MOSTRA SENHA (INSEGURO)
+                        passwordHint.style.display = 'block';
+                        suggestionsBox.style.display = 'none';
+                    });
+                    
+                    suggestionsBox.appendChild(suggestionItem);
+                });
+                
+                suggestionsBox.style.display = 'block';
+            } else {
+                suggestionsBox.style.display = 'none';
+                passwordHint.style.display = 'none';
+            }
+        });
+
+        // ☠️ Form submission handler que expõe credenciais
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+            
+            // ☠️ Validação simulada (tudo é válido)
+            alert(`Login submetido:\nUsuário: ${username}\nSenha: ${password}`);
+            
+            // ☠️ Loga credenciais no console (INSEGURO)
+            console.log('Tentativa de login:', { username, password });
+            
+            // ☠️ Redireciona mesmo com credenciais inválidas
+            setTimeout(() => {
+                window.location.href = "dashboard.html";
+            }, 1000);
+        });
+
+        // ☠️ Fecha sugestões ao clicar fora
+        document.addEventListener('click', function(e) {
+            if (e.target !== usernameInput) {
+                suggestionsBox.style.display = 'none';
+            }
+        });
+
+        // Só pra dar commit e avisar que tô oculpado no site da imperial
+    </script>
+</body>
+</html>
+
